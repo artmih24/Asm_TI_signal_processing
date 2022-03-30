@@ -26,43 +26,51 @@ float signal[100],
 	s2_1[91];
 
 int main(void) {
-	FILE *f_signal, *f_processed_signal, *f_s1, *f_s2, *f_s1_1, *f_s2_1;
+	FILE *f_signal, 
+		*f_processed_signal, 
+		*f_s1, 
+		*f_s2, 
+		*f_s1_1, 
+		*f_s2_1;
 	f_signal = fopen("signal.dat", "w");
 	f_processed_signal = fopen("processed_signal.dat", "w");
 	f_s1 = fopen("s1.dat", "w");
 	f_s2 = fopen("s2.dat", "w");
 	f_s1_1 = fopen("s1_1.dat", "w");
 	f_s2_1 = fopen("s2_1.dat", "w");
-	float A_signal = 20,					// Р°РјРїР»РёС‚СѓРґР° СЃРёРіРЅР°Р»Р°
-		Fc_signal = 1000,					// С‡Р°СЃС‚РѕС‚Р° СЃРёРіРЅР°Р»Р°
-		pi = 3.14159265358979323846,		// С‡РёСЃР»Рѕ РїРё
-		T1 = 1 / Fc_signal,					// РїРµСЂРёРѕРґ СЃРёРіРЅР°Р»Р° = 1 РјСЃ
-		SNR = 1.0 / 10,						// РѕС‚РЅРѕС€РµРЅРёРµ СЃРёРіРЅР°Р»-С€СѓРј
-		A_n = SNR * A_signal;				// Р°РјРїР»РёС‚СѓРґР° РїРѕРјРµС…Рё
-	int N = 10,								// С‡РёСЃР»Рѕ РѕС‚СЃС‡РµС‚РѕРІ, РїРѕ РєРѕС‚РѕСЂС‹Рј РІРµРґРµС‚СЃСЏ СѓСЃСЂРµРґРЅРµРЅРёРµ
-		N1 = 20;							// С‡РёСЃР»Рѕ РѕС‚СЃС‡РµС‚РѕРІ РЅР° РїРµСЂРёРѕРґ СЃРёРіРЅР°Р»Р°
-	float T = T1 / N1,						// С€Р°Рі РґРёСЃРєСЂРµС‚РёР·Р°С†РёРё = 0.05 РјСЃ = 50 РјРєСЃ
-		A_s1_s2 = 5,						// Р°РјРїР»РёС‚СѓРґР° С„РѕСЂРјРёСЂСѓРµРјС‹С… СЃРёРіРЅР°Р»РѕРІ
-		tau_s1_s2 = 20,						// РїРѕСЃС‚РѕСЏРЅРЅР°СЏ РІСЂРµРјРµРЅРё Р·Р°С‚СѓС…Р°РЅРёСЏ СЃРёРіРЅР°Р»РѕРІ = 20 СЃ
-		e = 2.7182818284590452354;			// С‡РёСЃР»Рѕ Рµ
+	float A_signal = 20,					// амплитуда сигнала
+		Fc_signal = 1000,					// частота сигнала
+		pi = 3.14159265358979323846,		// число пи
+		T1 = 1 / Fc_signal,					// период сигнала = 1 мс
+		SNR = 1.0 / 10,						// отношение сигнал-шум
+		A_n = SNR * A_signal;				// амплитуда помехи
+	int N = 10,								// число отсчетов, по которым ведется усреднение
+		N1 = 20;							// число отсчетов на период сигнала
+	float T = T1 / N1,						// шаг дискретизации = 0.05 мс = 50 мкс
+		A_s1_s2 = 5,						// амплитуда формируемых сигналов
+		tau_s1_s2 = 20,						// постоянная времени затухания сигналов = 20 с
+		e = 2.7182818284590452354;			// число е
 	int i;
-	srand(time(NULL));	// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РіРµРЅРµСЂР°С‚РѕСЂР° С‡РёСЃРµР» С‡РёСЃР»РѕРј СЃРµРєСѓРЅРґ, РїСЂРѕС€РµРґС€РёС… СЃ 01.01.1970 (РєР°Р¶РґС‹Р№ СЂР°Р· РіРµРЅРµСЂРёСЂСѓРµС‚ РЅРѕРІС‹Рµ С‡РёСЃР»Р°)
-	// С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃРёРіРЅР°Р»Р° СЃ РїРѕРјРµС…РѕР№:
+	srand(time(NULL));	// инициализация генератора чисел числом секунд, прошедших с 01.01.1970 (каждый раз генерирует новые числа)
+	// формирование сигнала с помехой:
 	for (i = 0; i < (sizeof(signal) / sizeof(float)); i++){
-		signal[i] = A_signal * (1 + sin(2 * pi * Fc_signal * i * T));			// РїРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РѕС†РёС„СЂРѕРІР°РЅРЅРѕРіРѕ СЃРёРіРЅР°Р»Р°
-		signal[i] += A_n * (((float)((rand() % 20001) - 10000)) / 10000);		// РґРѕР±Р°РІР»РµРЅРёРµ РїРѕРјРµС…Рё Рє СЃРёРіРЅР°Р»Сѓ
+		signal[i] = A_signal * (1 + sin(2 * pi * Fc_signal * i * T));			// получение значения оцифрованного сигнала
+		signal[i] += A_n * (((float)((rand() % 20001) - 10000)) / 10000);		// добавление помехи к сигналу
 		fprintf(f_signal, "%f\n", signal[i]);
 	}
 	asm_processing(signal, processed_signal, (sizeof(signal) / sizeof(float)), 10);
-	for (i = 0; i < (sizeof(processed_signal) / sizeof(float)); i++) fprintf(f_processed_signal, "%f\n", processed_signal[i]);
+	for (i = 0; i < (sizeof(processed_signal) / sizeof(float)); i++) 
+		fprintf(f_processed_signal, "%f\n", processed_signal[i]);
 	float proc_signal_max = 0, proc_signal_min = 40;
-	// РїРѕРёСЃРє РјР°РєСЃРёРјСѓРјР° Рё РјРёРЅРёРјСѓРјР° РѕР±СЂР°Р±РѕС‚Р°РЅРЅРѕРіРѕ СЃРёРіРЅР°Р»Р°
+	// поиск максимума и минимума обработанного сигнала
 	for (i = (N - 1); i < (sizeof(processed_signal) / sizeof(float)); i++){
-		if (processed_signal[i] < proc_signal_min) proc_signal_min = processed_signal[i];
-		if (processed_signal[i] > proc_signal_max) proc_signal_max = processed_signal[i];
+		if (processed_signal[i] < proc_signal_min) 
+			proc_signal_min = processed_signal[i];
+		if (processed_signal[i] > proc_signal_max) 
+			proc_signal_max = processed_signal[i];
 	}
-	// С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ Р·Р°С‚СѓС…Р°СЋС‰РёС… СЃРёРіРЅР°Р»РѕРІ s1 Рё s2
-	float k = (A_s1_s2 / ((proc_signal_max - proc_signal_min) / 2));		// РєРѕСЌС„С„РёС†РёРµРЅС‚ СѓРјРµРЅСЊС€РµРЅРёСЏ Р°РјРїР»РёС‚СѓРґС‹ СЃРёРіРЅР°Р»Р°
+	// формирование затухающих сигналов s1 и s2
+	float k = (A_s1_s2 / ((proc_signal_max - proc_signal_min) / 2));		// коэффициент уменьшения амплитуды сигнала
 	for (i = 0; i < (sizeof(processed_signal) / sizeof(float)); i++){
 		s1[i] = ((processed_signal[i] - proc_signal_min) * k  - A_s1_s2) * pow(e, -(i * T / tau_s1_s2));
 		s2[i] = s1[i] * i * T;
@@ -72,7 +80,7 @@ int main(void) {
 		s2_1[i] = s2[i];
 	}
 	float s1_max = -10, s1_min = 10, s2_max = -10, s2_min = 10;
-	// РїРѕРёСЃРє РјР°РєСЃРёРјСѓРјРѕРІ Рё РјРёРЅРёРјСѓРјРѕРІ СЃРёРіРЅР°Р»Р° s1 Рё s2
+	// поиск максимумов и минимумов сигнала s1 и s2
 	for (i = (N - 1); i < (sizeof(s1) / sizeof(float)); i++){
 		if (s1[i] < s1_min) s1_min = s1[i];
 		if (s1[i] > s1_max) s1_max = s1[i];
@@ -80,28 +88,47 @@ int main(void) {
 		if (s2[i] > s2_max) s2_max = s2[i];
 	}
 	float L_s1, L_s2;
-	// РІС‹С‡РёСЃР»РµРЅРёРµ СѓСЂРѕРІРЅСЏ, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ Р±СѓРґРµС‚ СѓСЃРµС‡РµРЅ СЃРёРіРЅР°Р» s1
-	if (s1_max > -s1_min) L_s1 = s1_max * (sqrt(2) / 2);
-	else L_s1 = -s1_min * (sqrt(2) / 2);
-	// РІС‹С‡РёСЃР»РµРЅРёРµ СѓСЂРѕРІРЅСЏ, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ Р±СѓРґРµС‚ СѓСЃРµС‡РµРЅ СЃРёРіРЅР°Р» s2
-	if (s2_max > -s2_min) L_s2 = s2_max * (sqrt(2) / 2);
-	else L_s2 = -s2_min * (sqrt(2) / 2);
-	int s1_l = 100, s1_r = -100, s2_l = 100, s2_r = -100;
-	// РїРѕРёСЃРє РїСЂР°РІРѕР№ Рё Р»РµРІРѕР№ РіСЂР°РЅРёС† РёРЅС‚РµСЂРІР°Р»РѕРІ, РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµС‚ СѓСЃРµС‡РµРЅРёРµ СЃРёРіРЅР°Р»РѕРІ s1 Рё s2
+	// вычисление уровня, по которому будет усечен сигнал s1
+	if (s1_max > -s1_min) 
+		L_s1 = s1_max * (sqrt(2) / 2);
+	else 
+		L_s1 = -s1_min * (sqrt(2) / 2);
+	// вычисление уровня, по которому будет усечен сигнал s2
+	if (s2_max > -s2_min) 
+		L_s2 = s2_max * (sqrt(2) / 2);
+	else 
+		L_s2 = -s2_min * (sqrt(2) / 2);
+	int s1_l = 100, 
+		s1_r = -100, 
+		s2_l = 100, 
+		s2_r = -100;
+	// поиск правой и левой границ интервалов, по которым будет усечение сигналов s1 и s2
 	for (i = 0; i < (sizeof(s1) / sizeof(float)); i++){
-		if ((s1[i] >= L_s1) || (s1[i] <= -L_s1)) s1_r = i;
-		if ((s2[i] >= L_s2) || (s2[i] <= -L_s2)) s2_r = i;
+		if ((s1[i] >= L_s1) || (s1[i] <= -L_s1)) 
+			s1_r = i;
+		if ((s2[i] >= L_s2) || (s2[i] <= -L_s2)) 
+			s2_r = i;
 	}
 	for (i = ((sizeof(s1) / sizeof(float)) - 1); i >= 0; i--){
-		if ((s1[i] >= L_s1) || (s1[i] <= -L_s1)) s1_l = i;
-		if ((s2[i] >= L_s2) || (s2[i] <= -L_s2)) s2_l = i;
+		if ((s1[i] >= L_s1) || (s1[i] <= -L_s1)) 
+			s1_l = i;
+		if ((s2[i] >= L_s2) || (s2[i] <= -L_s2)) 
+			s2_l = i;
 	}
-	// СѓСЃРµС‡РµРЅРёРµ СЃРёРіРЅР°Р»Р° s1, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ
-	if (s1_l > 0) for (i = 0; i < s1_l; i++) s1_1[i] = 0;
-	if (s1_r < (sizeof(s1) / sizeof(float)) - 1) for (i = s1_r + 1; i < sizeof(s1) / sizeof(float); i++) s1_1[i] = 0;
-	// СѓСЃРµС‡РµРЅРёРµ СЃРёРіРЅР°Р»Р° s2, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ
-	if (s2_l > 0) for (i = 0; i < s2_l; i++) s2_1[i] = 0;
-	if (s2_r < (sizeof(s2) / sizeof(float)) - 1) for (i = s2_r + 1; i < sizeof(s2) / sizeof(float); i++) s2_1[i] = 0;
+	// усечение сигнала s1, если требуется
+	if (s1_l > 0) 
+		for (i = 0; i < s1_l; i++) 
+			s1_1[i] = 0;
+	if (s1_r < (sizeof(s1) / sizeof(float)) - 1) 
+		for (i = s1_r + 1; i < sizeof(s1) / sizeof(float); i++) 
+			s1_1[i] = 0;
+	// усечение сигнала s2, если требуется
+	if (s2_l > 0) 
+		for (i = 0; i < s2_l; i++) 
+			s2_1[i] = 0;
+	if (s2_r < (sizeof(s2) / sizeof(float)) - 1) 
+		for (i = s2_r + 1; i < sizeof(s2) / sizeof(float); i++) 
+			s2_1[i] = 0;
 	for (i = 0; i < (sizeof(s1) / sizeof(float)); i++){
 		fprintf(f_s1_1, "%f\n", s1_1[i]);
 		fprintf(f_s2_1, "%f\n", s2_1[i]);
@@ -123,4 +150,5 @@ int main(void) {
 		Y_nakop_1 += pow(Y_1[i], 2) * (a * (i + 1) + 1) * pow(b, 3);
 		Z_1[i] = abs(Y_1[i] - X[i]);
 	}
-while(1);
+	while(1);
+}

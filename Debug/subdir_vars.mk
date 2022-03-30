@@ -4,17 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 ASM_SRCS += \
-../asmfunc.asm 
+../asm_get_y.asm \
+../asm_get_z.asm \
+../asm_processing.asm 
 
 C_SRCS += \
 ../main.c 
 
 OBJS += \
-./asmfunc.obj \
+./asm_get_y.obj \
+./asm_get_z.obj \
+./asm_processing.obj \
 ./main.obj 
 
 ASM_DEPS += \
-./asmfunc.pp 
+./asm_get_y.pp \
+./asm_get_z.pp \
+./asm_processing.pp 
 
 C_DEPS += \
 ./main.pp 
@@ -23,14 +29,20 @@ C_DEPS__QUOTED += \
 "main.pp" 
 
 OBJS__QUOTED += \
-"asmfunc.obj" \
+"asm_get_y.obj" \
+"asm_get_z.obj" \
+"asm_processing.obj" \
 "main.obj" 
 
 ASM_DEPS__QUOTED += \
-"asmfunc.pp" 
+"asm_get_y.pp" \
+"asm_get_z.pp" \
+"asm_processing.pp" 
 
 ASM_SRCS__QUOTED += \
-"../asmfunc.asm" 
+"../asm_get_y.asm" \
+"../asm_get_z.asm" \
+"../asm_processing.asm" 
 
 C_SRCS__QUOTED += \
 "../main.c" 

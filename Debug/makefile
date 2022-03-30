@@ -9,7 +9,9 @@ CG_TOOL_ROOT := C:/ti/ccsv5/tools/compiler/c6000_7.4.4
 ORDERED_OBJS += \
 $(GEN_CMDS__FLAG) \
 "./main.obj" \
-"./asmfunc.obj" \
+"./asm_processing.obj" \
+"./asm_get_z.obj" \
+"./asm_get_y.obj" \
 -l"libc.a" \
 
 -include ../makefile.init
@@ -109,22 +111,22 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: C_asmfunc.out
+all: Individual2.out
 
 # Tool invocations
-C_asmfunc.out: $(OBJS) $(GEN_CMDS)
+Individual2.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C6000 Linker'
-	"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/bin/cl6x" -mv6700 --abi=coffabi -g --display_error_number --diag_warning=225 --diag_wrap=off -z -m"C_asmfunc.map" -i"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/lib" -i"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="C_asmfunc_linkInfo.xml" --rom_model -o "C_asmfunc.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/bin/cl6x" -mv6700 --abi=coffabi -g --display_error_number --diag_warning=225 --diag_wrap=off --printf_support=full -z --stack_size=0x800 -m"Individual2.map" --heap_size=0x800 -i"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/lib" -i"C:/ti/ccsv5/tools/compiler/c6000_7.4.4/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="Individual2_linkInfo.xml" --rom_model --printf_support -o "Individual2.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(C6000_EXECUTABLE_OUTPUTS__QUOTED) "C_asmfunc.out"
+	-$(RM) $(C6000_EXECUTABLE_OUTPUTS__QUOTED) "Individual2.out"
 	-$(RM) "main.pp" 
-	-$(RM) "asmfunc.obj" "main.obj" 
-	-$(RM) "asmfunc.pp" 
+	-$(RM) "asm_get_y.obj" "asm_get_z.obj" "asm_processing.obj" "main.obj" 
+	-$(RM) "asm_get_y.pp" "asm_get_z.pp" "asm_processing.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
